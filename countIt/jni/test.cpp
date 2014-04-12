@@ -15,6 +15,8 @@
 
 #include "scribble.h"
 
+#include <limits>
+
 using namespace std;
 
 using namespace cimg_library;
@@ -101,5 +103,55 @@ int main(
     }
     
     (lFg, lBg, mask).display();
+
+    // Create graph...
+    IBFSGraph g;
+
+    g.initSize(
+            // number of nodes
+            img.width() * img.height(),
+            // number of edges
+            img.width() * img.height() * 2 -
+            img.width() -
+            img.height());
+
+    float maxL = fmax(lFg.max(), lBg.max());
+
+    // Only add edges going down and right since they are bi-directional
+    int neighborhood[2][2] = {{1, 0}, {0, 1}};
+
+    cimg_forXY(img, x, y) {
+        int lFgI = (lFg(x, y) / maxL) * std::numeric_limits<float>::max();
+        int lBgI = (lBg(x, y) / maxL) * std::numeric_limits<float>::max();
+
+        int nodeIdx = x + y * img.width();
+        // source is FG, sink is BG
+        g.addNode(nodeIdx, lFgI, lBgI);
+
+        float color[3];
+        color[0] = labImg(x, y, 0, 0);
+        color[1] = labImg(x, y, 0, 1);
+        color[2] = labImg(x, y, 0, 2);
+
+        for (int n = 0; n < 2; n++) {
+            int nx = x + neighborhood[n][0];
+            int ny = y + neighborhood[n][1];
+
+            if (nx < 0 || nx >= img.width() ||
+                    ny < 0 || ny >= img.height()) {
+                continue;
+            }
+
+            int nNodeIdx = nx + ny * img.width();
+
+            // FIXME compute edge capacities
+            int capacity = 3;
+
+            g.addEdge(nodeIdx, nNodeIdx, capacity, capacity);
+        }
+    }
+
+    g.initGraph();
+    g.computeMaxFlow();
 }
 
