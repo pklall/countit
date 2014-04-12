@@ -80,6 +80,30 @@ int main(
         }
     }
 
+    // Add border to background GMM
+    // top & bottom
+    for (int x = 0; x < img.width(); x++) {
+        for (int y = 0; y < img.height(); y += img.height() - 1) {
+            float color[3];
+            color[0] = labImg(x, y, 0, 0);
+            color[1] = labImg(x, y, 0, 1);
+            color[2] = labImg(x, y, 0, 2);
+
+            bgGMM.insertData(color, 1);
+        }
+    }
+
+    for (int y = 0; y < img.height(); y++) {
+        for (int x = 0; x < img.width(); x += img.width() - 1) {
+            float color[3];
+            color[0] = labImg(x, y, 0, 0);
+            color[1] = labImg(x, y, 0, 1);
+            color[2] = labImg(x, y, 0, 2);
+
+            bgGMM.insertData(color, 1);
+        }
+    }
+
     fgGMM.iterateGMM(50);
     printf("FG model\n");
     fgGMM.printModels();
@@ -110,7 +134,7 @@ int main(
     CImgList<float> gradient = labImg.get_shared_channel(0)
         .get_gradient("xy", 1);
 
-    for (int unaryFactor = 1; unaryFactor < 255; unaryFactor+=1) {
+    for (int unaryFactor = 1; unaryFactor < 25500; unaryFactor+=100) {
         printf("Processing unary factor %d\n", unaryFactor);
 
         // Create graph...
@@ -128,21 +152,15 @@ int main(
         // maxVal = fmax(maxVal * unaryFactor, fmax(gradient(0).max(),
                     // gradient(1).max()));
 
+        float maxGrad = fmax(gradient(0).max(), gradient(1).max());
+
         // TODO remove debugging code
-        int expectedNumNodes = img.width() * img.height();
-        int numNodes = 0;
-        int expectedNumEdges = 
-                (img.width() * img.height() * 2 -
-                img.width() -
-                img.height());
-        int numEdges = 0;
         cimg_forXY(img, x, y) {
-            int lFgI = (lFg(x, y) * unaryFactor / maxVal) * std::numeric_limits<int>::max();
-            int lBgI = (lBg(x, y) * unaryFactor / maxVal) * std::numeric_limits<int>::max();
+            int lFgI = (lFg(x, y) / maxVal / unaryFactor) * std::numeric_limits<int>::max();
+            int lBgI = (lBg(x, y) / maxVal / unaryFactor) * std::numeric_limits<int>::max();
 
             int nodeIdx = x + y * img.width();
             // source is FG, sink is BG
-            numNodes++;
             g.addNode(nodeIdx, lFgI, lBgI);
 
             float color[3];
@@ -164,35 +182,29 @@ int main(
                         ny >= 0 && ny < img.height()) {
                     int nNodeIdx = nx + ny * img.width();
 
-                    // FIXME compute edge capacities
-                    // float grad = fabs(gradient(n)(x, y));
-                    int capacity = -std::numeric_limits<int>::max() / 255; // (grad / maxVal) * ;
-
-                    numEdges++;
+                    float grad = fabs(gradient(n)(x, y));
+                    int capacity = -(grad / 255.0f) * std::numeric_limits<int>::max();
 
                     g.addEdge(nodeIdx, nNodeIdx, capacity, capacity);
                 }
             }
         }
 
-        printf("num nodes = %d / %d\n", numNodes, expectedNumNodes);
-        printf("num edges = %d / %d\n", numEdges, expectedNumEdges);
-
         g.initGraph();
 
         g.computeMaxFlow();
 
-        CImg<bool> postMask(img.width(), img.height());
+        CImg<int> postMask(img.width(), img.height());
 
-        postMask = false;
+        // postMask = false;
 
         cimg_forXY(img, x, y) {
-            postMask(x, y) = g.isNodeOnSrcSide(x + y * img.width());
+            postMask(x, y) = g.isNodeOnSrcSide(x + y * img.width()) ? 255 : 0;
         }
 
-        postMask.display();
+        // postMask.display();
 
-        // postMask.save(("results/unary_factor_" + std::to_string(unaryFactor) + ".png").c_str());
+        postMask.save(("results/unary_factor_" + std::to_string(unaryFactor) + ".png").c_str());
 
         // (mask, postMask).display();
     }
