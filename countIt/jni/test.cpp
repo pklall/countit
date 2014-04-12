@@ -54,7 +54,6 @@ int main(
             palette,
             scribbles,
             [&]() {
-                printf("scribbles done\n");
             });
 
     CImg<float> labImg = img.get_RGBtoLab();
@@ -88,6 +87,8 @@ int main(
     CImg<float> lFg(img.width(), img.height());
     CImg<float> lBg(img.width(), img.height());
 
+    CImg<bool> mask(img.width(), img.height());
+
     cimg_forXY(img, x, y) {
         float color[3];
         color[0] = labImg(x, y, 0, 0);
@@ -95,8 +96,10 @@ int main(
         color[2] = labImg(x, y, 0, 2);
         lFg(x, y) = fgGMM.getLikelihood(color);
         lBg(x, y) = bgGMM.getLikelihood(color);
+
+        mask(x, y) = lFg(x, y) > lBg(x, y);
     }
     
-    (lFg, lBg).display();
+    (lFg, lBg, mask).display();
 }
 
