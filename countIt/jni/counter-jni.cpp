@@ -4,6 +4,8 @@
 #define cimg_display 0
 #include "CImg.h"
 
+#include "ibfs.h"
+
 jint
 Java_com_example_countit_CounterJNIWrapper_processImage(
         JNIEnv* env,
