@@ -6,6 +6,8 @@
 
 #include "ibfs.h"
 
+#include "GMM.h"
+
 jint
 Java_com_example_countit_CounterJNIWrapper_processImage(
         JNIEnv* env,
