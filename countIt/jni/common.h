@@ -79,6 +79,11 @@ int countConnComponents(
     cimg_forXY(fgMask, x, y) {
         if (fgMask(x, y)) {
             int label = labels(x, y);
+
+            if (pixelCounts.count(label) == 0) {
+                pixelCounts[label] = 0;
+            }
+
             pixelCounts[label]++;
         }
     }
@@ -119,7 +124,11 @@ void nicename(
     GMM fgGMM(3, numGaussians);
     GMM bgGMM(3, numGaussians);
 
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 1");
+
     CImg<uint8_t> labImg = img.get_RGBtoLab();
+
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 2");
 
     cimg_forXY(img, x, y) {
         if (initialFg(x, y)) {
@@ -131,6 +140,8 @@ void nicename(
             fgGMM.insertData(color, 1);
         }
     }
+
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 3");
 
     // Add border to background GMM
     // top & bottom
@@ -149,6 +160,8 @@ void nicename(
         }
     }
 
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 4");
+
     for (int y = 0; y < img.height(); y += inc) {
         for (int x = 0; x < img.width(); x += img.width() - 1) {
             float color[3];
@@ -160,14 +173,27 @@ void nicename(
         }
     }
 
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 5");
+
     // FIXME arbitrary parameter!
     fgGMM.iterateGMM(50);
+
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 6");
+
     bgGMM.iterateGMM(50);
 
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 7");
+
     CImg<float> lFg(img.width(), img.height());
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 8");
+
     CImg<float> lBg(img.width(), img.height());
 
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 9");
+
     CImg<bool> mask(img.width(), img.height());
+
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 10");
 
     // Evaluate GMMs
     cimg_forXY(img, x, y) {
@@ -181,13 +207,21 @@ void nicename(
         mask(x, y) = lFg(x, y) > lBg(x, y);
     }
 
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 11");
+
     // Refine FG GMM
     fgGMM.clear();
+
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 12");
     
     refineGMM(labImg, lFg, lBg, mask, fgGMM, 0.25f);
 
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 13");
+
     // FIXME arbitrary parameter!
     fgGMM.iterateGMM(50);
+
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 14");
 
     // Evaluate GMMs again
     for (int y = 0; y < img.height(); y++) {
@@ -203,10 +237,16 @@ void nicename(
         }
     }
 
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 15");
+
     eraseDisconnectedBg(mask);
+
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 16");
 
     // FIXME 50 is arbitrary!
     count = countConnComponents(mask, 50);
+
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 17");
 
     outline = CImg<bool>(mask.width(), mask.height()); 
 

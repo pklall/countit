@@ -8,6 +8,8 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)
 
 LOCAL_CPPFLAGS := -std=c++11
 
+LOCAL_LDLIBS := -llog
+
 LOCAL_MODULE := counter-jni
 LOCAL_SRC_FILES := counter-jni.cpp ibfs.cpp GMM.cpp
 
