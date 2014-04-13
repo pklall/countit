@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <application>
+        <activity
+            android:name="...com.example.countit.GalleryActivity"
+            android:label="@string/title_activity_gallery" >
+        </activity>
+        <activity
+            android:name="...com.example.countit.ImgGallery"
+            android:label="@string/title_activity_img_gallery" >
+        </activity>
+    </application>
+
+</manifest>
