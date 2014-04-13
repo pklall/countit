@@ -26,5 +26,11 @@
         android:id="@+id/select_pic_button"
         android:onClick="selectPicButtonClick"
           />
+    
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/thecount"
+        />
 
 </LinearLayout>
