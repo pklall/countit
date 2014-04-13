@@ -101,6 +101,9 @@ public class ManipulateImgActivity extends ActionBarActivity implements
 	Uri imageUri = null;
 	DrawingView surface;
 	
+	int BITMAP_HEIGHT = 2048;
+	int BITMAP_WIDTH = 2048;
+	
 	@Override protected void onCreate(Bundle savedInstanceState) {
 	  super.onCreate(savedInstanceState);
 	  setContentView(R.layout.manipulate_pic);
@@ -154,6 +157,7 @@ public class ManipulateImgActivity extends ActionBarActivity implements
 	  
 	  try {
 		  	Bitmap bmp =  MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+		  	bmp = Bitmap.createScaledBitmap(bmp, BITMAP_HEIGHT, BITMAP_WIDTH, false);
 		  	ImageView img = (ImageView) findViewById(R.id.image_manipulate);
 		  	img.setImageBitmap(bmp);
 		  	// img.setImageResource(R.drawable.ic_launcher);
