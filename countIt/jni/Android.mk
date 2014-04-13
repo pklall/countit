@@ -6,6 +6,10 @@ APP_STL:=stlport_static
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)
 
+LOCAL_CFLAGS += -fopenmp
+
+LOCAL_LDFLAGS += -fopenmp
+
 LOCAL_CPPFLAGS := -std=c++11
 
 LOCAL_LDLIBS := -llog

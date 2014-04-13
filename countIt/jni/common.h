@@ -26,15 +26,13 @@ void refineGMM(
         const CImg<float>& labImg,
         const CImg<float>& lfg,
         const CImg<float>& lbg,
-        const CImg<bool>& fgMask,
         GMM& fgGMM,
         float inlierProportion) {
     vector<tuple<float, int, int>> samples;
 
-    cimg_forXY(labImg, x, y) {
-        if (fgMask(x, y)) {
+    for (int y = 0; y < labImg.height(); y+=2) {
+        for (int x = 0; x < labImg.width(); x+=2) {
             float diff = lfg(x, y) - lbg(x, y);
-
             if (diff > 0) {
                 samples.push_back(make_tuple(diff, x, y));
             }
@@ -62,9 +60,12 @@ void eraseDisconnectedBg(
 
     int bgLabel = labels(0, 0);
 
-    cimg_forXY(fgMask, x, y) {
-        if (!fgMask(x, y) && labels(x, y) != bgLabel) {
-            fgMask(x, y) = true;
+#pragma omp parallel for
+    for (int y = 0; y < fgMask.height(); y++) {
+        for (int x = 0; x < fgMask.width(); x++) {
+            if (!fgMask(x, y) && labels(x, y) != bgLabel) {
+                fgMask(x, y) = true;
+            }
         }
     }
 }
@@ -147,7 +148,7 @@ void nicename(
     // top & bottom
     
     // FIXME arbitrary parameter!
-    const int inc = 2;
+    const int inc = 10;
 
     for (int x = 0; x < img.width(); x += inc) {
         for (int y = 0; y < img.height(); y += img.height() - 1) {
@@ -191,20 +192,19 @@ void nicename(
 
     __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 9");
 
-    CImg<bool> mask(img.width(), img.height());
-
     __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 10");
 
     // Evaluate GMMs
-    cimg_forXY(img, x, y) {
-        float color[3];
-        color[0] = labImg(x, y, 0, 0);
-        color[1] = labImg(x, y, 0, 1);
-        color[2] = labImg(x, y, 0, 2);
-        lFg(x, y) = fgGMM.getLikelihood(color);
-        lBg(x, y) = bgGMM.getLikelihood(color);
-
-        mask(x, y) = lFg(x, y) > lBg(x, y);
+#pragma omp parallel for
+    for (int y = 0; y < labImg.height(); y++) {
+        for (int x = 0; x < labImg.width(); x++) {
+            float color[3];
+            color[0] = labImg(x, y, 0, 0);
+            color[1] = labImg(x, y, 0, 1);
+            color[2] = labImg(x, y, 0, 2);
+            lFg(x, y) = fgGMM.getLikelihood(color);
+            lBg(x, y) = bgGMM.getLikelihood(color);
+        }
     }
 
     __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 11");
@@ -214,7 +214,7 @@ void nicename(
 
     __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 12");
     
-    refineGMM(labImg, lFg, lBg, mask, fgGMM, 0.25f);
+    refineGMM(labImg, lFg, lBg, fgGMM, 0.25f);
 
     __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 13");
 
@@ -223,7 +223,10 @@ void nicename(
 
     __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "DEBUGGING PART 14");
 
+    CImg<bool> mask(img.width(), img.height());
+
     // Evaluate GMMs again
+#pragma omp parallel for
     for (int y = 0; y < img.height(); y++) {
         for (int x = 0; x < img.width(); x++) {
             float color[3];

@@ -88,8 +88,8 @@ extern "C" {
                 for (int x = 0; x < imgWidth; x++) {
                     if (outline(x, y)) {
                         rawOverlayBuf[(x + y * imgWidth) * 4 + 0] = 255;
-                        rawOverlayBuf[(x + y * imgWidth) * 4 + 1] = 255;
-                        rawOverlayBuf[(x + y * imgWidth) * 4 + 2] = 255;
+                        rawOverlayBuf[(x + y * imgWidth) * 4 + 1] = 0;
+                        rawOverlayBuf[(x + y * imgWidth) * 4 + 2] = 0;
                     } else {
                         rawOverlayBuf[(x + y * imgWidth) * 4 + 0] = outputImg(x, y, 0, 0);
                         rawOverlayBuf[(x + y * imgWidth) * 4 + 1] = outputImg(x, y, 0, 1);

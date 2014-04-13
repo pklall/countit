@@ -2,22 +2,21 @@ package com.example.countit;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.TextView;
 
 public class ManipulateImgActivity extends ActionBarActivity implements
 		SurfaceHolder.Callback {
@@ -25,11 +24,25 @@ public class ManipulateImgActivity extends ActionBarActivity implements
 	Uri imageUri = null;
 	DrawingView surface;
 
-	int BITMAP_SIZE = 1024;
+	int BITMAP_SIZE = 512;
+
+	int count = -1;
 
 	public void recompute() {
-		CounterJNIWrapper.processImage(surface.pointX, surface.pointY,
-				surface.img, surface.overlay);
+		if (surface.pointX.size() == 0) {
+			count = -1;
+		} else {
+			count = CounterJNIWrapper.processImage(surface.pointX,
+					surface.pointY, surface.img, surface.overlay);
+		}
+		
+		if (count == -1) {
+			((TextView) findViewById(R.id.text_count)).setText("Tap an item you wish to count!");
+
+			surface.overlay.eraseColor(Color.argb(0, 0, 0, 0));
+		} else {
+			((TextView) findViewById(R.id.text_count)).setText("Count: " + count);
+		}
 
 		surface.invalidate();
 	}
@@ -64,12 +77,13 @@ public class ManipulateImgActivity extends ActionBarActivity implements
 		imageUri = Uri.parse(extras.getString("imageUri"));
 
 		try {
-			surface.img = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
-			
-			float scaleFact = ((float) BITMAP_SIZE) / Math.max(surface.img.getWidth(), surface.img.getHeight());
-			
-			surface.img = Bitmap.createScaledBitmap(
-					surface.img,
+			surface.img = MediaStore.Images.Media.getBitmap(
+					getContentResolver(), imageUri);
+
+			float scaleFact = ((float) BITMAP_SIZE)
+					/ Math.max(surface.img.getWidth(), surface.img.getHeight());
+
+			surface.img = Bitmap.createScaledBitmap(surface.img,
 					(int) (surface.img.getWidth() * scaleFact),
 					(int) (surface.img.getHeight() * scaleFact), true);
 			surface.img = surface.img.copy(Bitmap.Config.ARGB_8888, false);
