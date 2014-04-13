@@ -1,14 +1,19 @@
 package com.example.countit;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.util.Log;
 
 public class MainActivity extends ActionBarActivity {
@@ -29,7 +35,12 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_layout);
-              
+      
+        
+        ImageView imgv = (ImageView) findViewById(R.id.thecount);
+        Resources res = getResources(); // need this to fetch the drawable
+        Drawable draw = res.getDrawable( R.drawable.thecount_transparent );
+        imgv.setImageDrawable(draw);
 	/*
         setContentView(R.layout.activity_main);
 
@@ -70,6 +81,8 @@ public class MainActivity extends ActionBarActivity {
     	// View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         View rootView = inflater.inflate(R.layout.home_layout, container, false);
 
+     
+        
 /*
         findViewById(R.id.take_pic_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,6 +116,8 @@ public class MainActivity extends ActionBarActivity {
     
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_TAKE_PHOTO = 1;
+    private static final int SELECT_PHOTO = 100;
+
     
     public void dispatchTakePictureIntent(View view){
     	Log.v("dispatch","dispatch picture action");
@@ -145,6 +160,24 @@ public class MainActivity extends ActionBarActivity {
     			manipulateIntent.putExtra("imageUri",returnedUri.toString());
     	    	startActivity(manipulateIntent);
     			break;
+    		case SELECT_PHOTO:
+    	        if(result == RESULT_OK){  
+    	            Uri selectedImage = returnedIntent.getData();
+    	            Intent manipulateSelectedIntent = new Intent(this,ManipulateImgActivity.class);
+        			manipulateSelectedIntent.putExtra("imageUri",selectedImage.toString());
+        	    	startActivity(manipulateSelectedIntent);
+    	          //  InputStream imageStream = null;
+    	          //  Bitmap newSelectedImage;
+    	          //try {
+    	        //	  
+					//	imageStream = getContentResolver().openInputStream(selectedImage);
+	    	         //   newSelectedImage = BitmapFactory.decodeStream(imageStream);
+				//	} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+					//	e.printStackTrace();
+				//	}
+    	        	}
+    			break;
     		default:
     			break;
     	}
@@ -152,8 +185,11 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void selectPicButtonClick(View view){
-    	Intent goToGalleryIntent = new Intent(this, GalleryActivity.class);
-    	startActivity(goToGalleryIntent);
+//    	Intent goToGalleryIntent = new Intent(this, GalleryActivity.class);
+ //   	startActivity(goToGalleryIntent);
+    	Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+    	photoPickerIntent.setType("image/*");
+    	startActivityForResult(photoPickerIntent, SELECT_PHOTO);
     }
 
 
