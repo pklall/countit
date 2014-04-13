@@ -2,14 +2,23 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-    <ImageView
+    <!--ImageView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/image_manipulate"
-    />
+    /-->
     <com.example.countit.DrawingView
         android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:id="@+id/draw_surface"
 	/>
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:layout_marginRight = "10dip"
+        android:layout_marginLeft = "10dip"
+        android:text="Reset"
+        android:id="@+id/reset_button"
+         />
 </RelativeLayout>    
