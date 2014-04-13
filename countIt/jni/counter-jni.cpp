@@ -33,9 +33,9 @@ Java_com_example_countit_CounterJNIWrapper_processImage(
     CImg<uint8_t> inputImg(imgWidth, imgHeight, 3);
 
     cimg_forXY(inputImg, x, y) {
-        inputImg(x, y, 0) = rawInputBuf[(x + y * imgWidth) * 4 + 0];
-        inputImg(x, y, 1) = rawInputBuf[(x + y * imgWidth) * 4 + 1];
-        inputImg(x, y, 2) = rawInputBuf[(x + y * imgWidth) * 4 + 2];
+        inputImg(x, y, 0) = rawInputBuf[(x + y * imgWidth) * 4 + 1];
+        inputImg(x, y, 1) = rawInputBuf[(x + y * imgWidth) * 4 + 2];
+        inputImg(x, y, 2) = rawInputBuf[(x + y * imgWidth) * 4 + 3];
     }
 
     CImg<uint8_t> outputImg(imgWidth, imgHeight, 3);
@@ -44,9 +44,13 @@ Java_com_example_countit_CounterJNIWrapper_processImage(
 
     for (int y = 0; y < imgHeight; y++) {
         for (int x = 0; x < imgWidth; x++) {
-            rawOverlayBuf[(x + y * imgWidth) * 4 + 0] = outputImg(x, y, 0);
-            rawOverlayBuf[(x + y * imgWidth) * 4 + 1] = outputImg(x, y, 1);
-            rawOverlayBuf[(x + y * imgWidth) * 4 + 2] = outputImg(x, y, 2);
+            // FIXME this only copies red channel
+            rawOverlayBuf[(x + y * imgWidth) * 4 + 0] = 255;
+            rawOverlayBuf[(x + y * imgWidth) * 4 + 1] = outputImg(x, y, 0);
+            rawOverlayBuf[(x + y * imgWidth) * 4 + 2] = 0;
+            rawOverlayBuf[(x + y * imgWidth) * 4 + 3] = 0;
+            // rawOverlayBuf[(x + y * imgWidth) * 4 + 1] = outputImg(x, y, 1);
+            // rawOverlayBuf[(x + y * imgWidth) * 4 + 2] = outputImg(x, y, 2);
         }
     }
 

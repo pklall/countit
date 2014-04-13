@@ -16,13 +16,10 @@
 #include "scribble.h"
 
 #include <limits>
-
 #include <string>
-
 #include <vector>
-
+#include <map>
 #include <tuple>
-
 #include <algorithm>
 
 using namespace std;
@@ -76,6 +73,46 @@ void eraseDisconnectedBg(
     }
 }
 
+int countConnComponents(
+        CImg<bool>& fgMask,
+        int minPixelCount) {
+    CImg<int> labels = fgMask.get_label();
+
+    map<int, int> pixelCounts;
+
+    cimg_forXY(fgMask, x, y) {
+        if (fgMask(x, y)) {
+            int label = labels(x, y);
+            pixelCounts[label]++;
+        }
+    }
+
+    cimg_forXY(fgMask, x, y) {
+        if (fgMask(x, y)) {
+            int label = labels(x, y);
+            if (pixelCounts[label] < minPixelCount) {
+                fgMask(x, y) = false;
+            }
+        }
+    }
+
+    int count = 0;
+
+    for (const auto& pair : pixelCounts) {
+        if (pair.second > minPixelCount) {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+void createOutline(
+        const CImg<bool>& fgMask,
+        CImg<bool>& outline) {
+    outline = fgMask.get_dilate(3) - fgMask.get_erode(1);
+}
+
 int main(
         int argc,
         char** argv) {
@@ -100,7 +137,6 @@ int main(
     palette(1, 0, 0, 0) = 255.0f;
     palette(1, 0, 0, 1) = 0.0f;
     palette(1, 0, 0, 2) = 0.0f;
-
 
     CImg<int> scribbles(img.width(), img.height());
 
@@ -190,7 +226,7 @@ int main(
     // mask.erode(3);
     // mask.dilate(3);
 
-    mask.display();
+    // mask.display();
 
     // Refine GMM based on current mask
 
@@ -215,11 +251,9 @@ int main(
         }
     }
 
-    mask.display();
+    // mask.display();
 
-    eraseDisconnectedBg(mask);
-
-    mask.display();
+    // mask.display();
 
     // '1' indicates forward differences
     // CImgList<float> gradient = labImg.get_gradient("xy", 1);
@@ -231,8 +265,7 @@ int main(
     }
 
     // Refine with graph cuts
-    // for (int unaryFactor = 1; unaryFactor < 255; unaryFactor+=1) {
-    {
+    if (false) {
         int unaryFactor = 1;
         printf("Processing unary factor %d\n", unaryFactor);
 
@@ -301,19 +334,34 @@ int main(
 
         printf("done\n");
 
-        CImg<int> postMask(img.width(), img.height());
+        CImg<bool> postMask(img.width(), img.height());
 
-        // postMask = false;
+        postMask = false;
 
         cimg_forXY(img, x, y) {
-            postMask(x, y) = g.isNodeOnSrcSide(x + y * img.width()) ? 255 : 0;
+            postMask(x, y) = g.isNodeOnSrcSide(x + y * img.width());
         }
-
-        postMask.display();
-
-        // postMask.save(("results/unary_factor_" + std::to_string(unaryFactor) + ".png").c_str());
-
-        // (mask, postMask).display();
     }
+
+    CImg<bool> postMask = mask;
+
+    eraseDisconnectedBg(postMask);
+
+    postMask.display();
+
+    // FIXME 50 is arbitrary!
+    int count = countConnComponents(postMask, 50);
+
+    printf("COUNT = %d\n", count);
+
+    CImg<bool> outline(postMask.width(), postMask.height());
+
+    createOutline(postMask, outline);
+
+    outline.display();
+
+    // postMask.save(("results/unary_factor_" + std::to_string(unaryFactor) + ".png").c_str());
+
+    // (mask, postMask).display();
 }
 
