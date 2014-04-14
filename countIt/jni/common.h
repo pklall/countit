@@ -148,7 +148,7 @@ void nicename(
     // top & bottom
     
     // FIXME arbitrary parameter!
-    const int inc = 10;
+    const int inc = 5;
 
     for (int x = 0; x < img.width(); x += inc) {
         for (int y = 0; y < img.height(); y += img.height() - 1) {
@@ -234,7 +234,8 @@ void nicename(
             color[1] = labImg(x, y, 0, 1);
             color[2] = labImg(x, y, 0, 2);
             lFg(x, y) = fgGMM.getLikelihood(color);
-            lBg(x, y) = bgGMM.getLikelihood(color);
+            
+            // lBg(x, y) = bgGMM.getLikelihood(color);
 
             mask(x, y) = lFg(x, y) > lBg(x, y);
         }

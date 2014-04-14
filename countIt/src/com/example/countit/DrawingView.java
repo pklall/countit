@@ -26,7 +26,7 @@ public class DrawingView extends View {
 
 	public Bitmap img;
 	public Bitmap overlay;
-	
+
 	private static Matrix imgMatrix = new Matrix();
 	private static Matrix revImgMatrix = new Matrix();
 
@@ -46,28 +46,30 @@ public class DrawingView extends View {
 	public void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
-		RectF dst = new RectF();
-		dst.left = 0;
-		dst.top = 0;
-		dst.right = canvas.getWidth();
-		dst.bottom = canvas.getHeight();
+		if (img != null) {
+			RectF dst = new RectF();
+			dst.left = 0;
+			dst.top = 0;
+			dst.right = canvas.getWidth();
+			dst.bottom = canvas.getHeight();
 
-		RectF src = new RectF();
-		src.left = 0;
-		src.top = 0;
-		src.right = img.getWidth();
-		src.bottom = img.getHeight();
+			RectF src = new RectF();
+			src.left = 0;
+			src.top = 0;
+			src.right = img.getWidth();
+			src.bottom = img.getHeight();
 
-		imgMatrix.setRectToRect(src, dst, ScaleToFit.CENTER);
-		
-		imgMatrix.invert(revImgMatrix);
+			imgMatrix.setRectToRect(src, dst, ScaleToFit.CENTER);
 
-		canvas.drawBitmap(img, imgMatrix, null);
+			imgMatrix.invert(revImgMatrix);
 
-		canvas.drawBitmap(overlay, imgMatrix, null);
+			canvas.drawBitmap(img, imgMatrix, null);
 
-		if (circleX > 0 && circleY > 0) {
-			canvas.drawCircle(circleX, circleY, circleRadius, paint);
+			canvas.drawBitmap(overlay, imgMatrix, null);
+
+			if (circleX > 0 && circleY > 0) {
+				// canvas.drawCircle(circleX, circleY, circleRadius, paint);
+			}
 		}
 	}
 

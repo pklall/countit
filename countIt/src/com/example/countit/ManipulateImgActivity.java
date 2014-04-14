@@ -29,19 +29,24 @@ public class ManipulateImgActivity extends ActionBarActivity implements
 	int count = -1;
 
 	public void recompute() {
+		((TextView) findViewById(R.id.text_count))
+				.setText("Counting... please wait...");
+
 		if (surface.pointX.size() == 0) {
 			count = -1;
 		} else {
 			count = CounterJNIWrapper.processImage(surface.pointX,
 					surface.pointY, surface.img, surface.overlay);
 		}
-		
+
 		if (count == -1) {
-			((TextView) findViewById(R.id.text_count)).setText("Tap an item you wish to count!");
+			((TextView) findViewById(R.id.text_count))
+					.setText("Tap an item you wish to count!");
 
 			surface.overlay.eraseColor(Color.argb(0, 0, 0, 0));
 		} else {
-			((TextView) findViewById(R.id.text_count)).setText("Count: " + count);
+			((TextView) findViewById(R.id.text_count)).setText("Count: "
+					+ count);
 		}
 
 		surface.invalidate();
